@@ -40,6 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String private_key = "";
 
   int balance = 0;
+  bool loading = false;
 
   Future<List<dynamic>> query(String functionName, List<dynamic> args) async {
     DeployedContract contract = await getContract();
@@ -80,9 +81,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> getBalance() async {
-    // EthereumAddress ethAddress = EthereumAddress.fromHex(address);
+    loading = true;
+    setState(() {});
     List<dynamic> result = await query('balance', []);
     balance = int.parse(result[0].toString());
+    loading = false;
     print(balance.toString());
     setState(() {});
   }
@@ -118,8 +121,19 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           children: [
-            Text("Balance"),
-            Text(balance.toString()),
+            SizedBox(
+              height: 30,
+            ),
+            Text(
+              "Balance",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+            ),
+            loading
+                ? CircularProgressIndicator()
+                : Text(
+                    balance.toString(),
+                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.w500),
+                  ),
             Container(
               width: MediaQuery.of(context).size.width * 0.6,
               child: TextField(
@@ -128,13 +142,48 @@ class _MyHomePageState extends State<MyHomePage> {
                 decoration: InputDecoration(label: Text('amount')),
               ),
             ),
-            TextButton(onPressed: getBalance, child: Text('Refresh')),
-            TextButton(
-                onPressed: () => deposit(int.parse(controller.text)),
-                child: Text('Deposit')),
-            TextButton(
-                onPressed: () => withdraw(int.parse(controller.text)),
-                child: Text('Withdraw'))
+            Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue,
+                  ),
+                  child: IconButton(
+                    onPressed: getBalance,
+                    icon: Icon(Icons.refresh),
+                    color: Colors.white,
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.green,
+                  ),
+                  child: IconButton(
+                    onPressed: () => deposit(int.parse(controller.text)),
+                    icon: Icon(Icons.upload),
+                    color: Colors.white,
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.red,
+                  ),
+                  child: IconButton(
+                    onPressed: () => withdraw(int.parse(controller.text)),
+                    icon: Icon(Icons.download),
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 20,
+            )
           ],
         ),
       ),
